@@ -52,6 +52,9 @@ public class DeployMojo extends DeployMojoSupport {
     @Override
     public void execute() throws MojoExecutionException {
         init();
+
+        // Get the toolchain if configured
+        initToolchain();
         
         if (skip) {
             getLog().info("\nSkipping deploy goal.\n");
@@ -66,6 +69,15 @@ public class DeployMojo extends DeployMojoSupport {
     }
 
     private void doDeploy() throws IOException, MojoExecutionException, TransformerException, ParserConfigurationException {
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
+        }
+
         checkServerHomeExists();
         checkServerDirectoryExists();
         

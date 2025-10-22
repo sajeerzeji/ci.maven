@@ -129,6 +129,9 @@ public class PackageServerMojo extends StartDebugMojoSupport {
     public void execute() throws MojoExecutionException {
         init();
 
+        // Get the toolchain if configured
+        initToolchain();
+
         // Set default outputDirectory to liberty-alt-output-dir for package goal.
         if (defaultOutputDirSet) {
             outputDirectory = new File(project.getBuild().getDirectory(), "liberty-alt-output-dir");
@@ -147,6 +150,15 @@ public class PackageServerMojo extends StartDebugMojoSupport {
     }
 
     private void doPackage() throws MojoExecutionException, IOException {
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
+        }
+
         if (isInstall) {
             installServerAssembly();
         } else {

@@ -42,6 +42,9 @@ public class DebugServerMojo extends StartDebugMojoSupport {
     public void execute() throws MojoExecutionException {
         init();
 
+        // Get the toolchain if configured
+        initToolchain();
+
         if (skip) {
             getLog().info("\nSkipping debug goal.\n");
             return;
@@ -51,6 +54,15 @@ public class DebugServerMojo extends StartDebugMojoSupport {
     }
 
     private void doDebug() throws MojoExecutionException {
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
+        }
+
         if (isInstall) {
             try {
                 installServerAssembly();

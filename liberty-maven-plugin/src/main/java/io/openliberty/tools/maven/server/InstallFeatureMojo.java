@@ -16,6 +16,7 @@
 package io.openliberty.tools.maven.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import io.openliberty.tools.common.plugins.util.InstallFeatureUtil;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException;
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms;
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties;
+import org.apache.maven.toolchain.Toolchain;
 
 /**
  * This mojo installs a feature packaged as a Subsystem Archive (esa) to the
@@ -67,6 +69,9 @@ public class InstallFeatureMojo extends InstallFeatureSupport {
             return;
         }
 
+        // Get the toolchain if configured
+        initToolchain();
+
         doInstallFeatures();
     }
 
@@ -82,7 +87,16 @@ public class InstallFeatureMojo extends InstallFeatureSupport {
         }
     }
 
-    private void installFeatures() throws PluginExecutionException {
+    private void installFeatures() throws PluginExecutionException, MojoExecutionException {
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
+        }
+
         // If non-container mode, check for Beta version and skip if needed.  Container mode does not need to check since featureUtility will check when it is called.
         List<ProductProperties> propertiesList = null;
         String openLibertyVersion = null;

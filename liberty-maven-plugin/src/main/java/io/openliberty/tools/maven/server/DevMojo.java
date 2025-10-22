@@ -432,6 +432,15 @@ public class DevMojo extends LooseAppSupport {
                     runBoostMojo("package");
                 } else {
                     runLibertyMojoCreate();
+
+                    // Configure server to use toolchain JDK if available
+                    if (toolchain != null) {
+                        try {
+                            configureServerForToolchain(toolchain);
+                        } catch (IOException e) {
+                            throw new PluginExecutionException("Error configuring server to use toolchain JDK", e);
+                        }
+                    }
                 }
             } catch (MojoExecutionException e) {
                 throw new PluginExecutionException(e);
@@ -515,6 +524,28 @@ public class DevMojo extends LooseAppSupport {
                 serverTask = initializeJava();
                 copyConfigFiles();
                 serverTask.setClean(clean);
+
+                // Configure server to use toolchain JDK if available
+                if (toolchain != null) {
+                    try {
+                        configureServerForToolchain(toolchain);
+
+                        // Get JDK home from toolchain
+                        String jdkHome = getJdkHomeFromToolchain(toolchain);
+                        if (jdkHome != null) {
+                            // Set WLP_JAVA_HOME environment variable
+                            Map<String, String> envVars = new HashMap<>();
+                            envVars.put("WLP_JAVA_HOME", jdkHome);
+                            // Also set JAVA_HOME to ensure the server script uses the correct JDK
+                            envVars.put("JAVA_HOME", jdkHome);
+                            serverTask.setEnvironmentVariables(envVars);
+                            getLog().info("Set WLP_JAVA_HOME and JAVA_HOME environment variables to: " + jdkHome);
+                        }
+                    } catch (IOException e) {
+                        throw new PluginExecutionException("Error configuring server to use toolchain JDK", e);
+                    }
+                }
+
                 if (libertyDebug) {
                     setLibertyDebugPort(libertyDebugPort);
 
@@ -1682,6 +1713,9 @@ public class DevMojo extends LooseAppSupport {
     @Override
     public void execute() throws MojoExecutionException {
         init();
+
+        // Get the toolchain if configured
+        initToolchain();
         
         if (skip) {
             getLog().info("\nSkipping dev goal.\n");

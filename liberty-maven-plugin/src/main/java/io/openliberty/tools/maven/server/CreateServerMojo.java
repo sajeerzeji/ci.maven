@@ -17,19 +17,25 @@ package io.openliberty.tools.maven.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.toolchain.Toolchain;
+import org.apache.maven.toolchain.ToolchainManager;
 import org.codehaus.plexus.util.FileUtils;
 
 import io.openliberty.tools.ant.ServerTask;
 
 /**
  * Create a liberty server
-  */
+ */
 @Mojo(name = "create", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true)
 public class CreateServerMojo extends PluginConfigSupport {
 
@@ -44,13 +50,13 @@ public class CreateServerMojo extends PluginConfigSupport {
      */
     @Parameter(property = "libertySettingsFolder", defaultValue = "${basedir}/src/main/resources/etc")
     private File libertySettingsFolder;
-    
+
     /**
      * Specifies the --no-password option
      */
     @Parameter(property = "noPassword", defaultValue = "false")
     private boolean noPassword;
-    
+
     @Override
     public void execute() throws MojoExecutionException {
         init();
@@ -60,11 +66,13 @@ public class CreateServerMojo extends PluginConfigSupport {
             return;
         }
 
-        doCreateServer(); 
+        // Get the toolchain if configured
+        initToolchain();
+
+        doCreateServer();
     }
 
     private void doCreateServer() throws MojoExecutionException {
-
         if (isInstall) {
             installServerAssembly();
         } else {
@@ -95,7 +103,7 @@ public class CreateServerMojo extends PluginConfigSupport {
             serverTask.execute();
             getLog().info(MessageFormat.format(messages.getString("info.server.create.created"), serverName, serverDirectory.getAbsolutePath()));
         }
-        
+
         // copy files _after_ we create the server
         try {
             copyConfigFiles();
@@ -106,7 +114,16 @@ public class CreateServerMojo extends PluginConfigSupport {
         try {
             copyLibertySettings();
         } catch (IOException e) {
-            throw new MojoExecutionException("Error copying Liberty settings from directory "+libertySettingsFolder.getAbsolutePath()+" to Liberty server directory.", e);
+            throw new MojoExecutionException("Error copying Liberty settings from directory " + libertySettingsFolder.getAbsolutePath() + " to Liberty server directory.", e);
+        }
+
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
         }
     }
 

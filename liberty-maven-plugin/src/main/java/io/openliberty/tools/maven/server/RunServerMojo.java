@@ -49,6 +49,9 @@ public class RunServerMojo extends PluginConfigSupport {
     public void execute() throws MojoExecutionException {
         init();
 
+        // Get the toolchain if configured
+        initToolchain();
+
         if (skip) {
             getLog().info("\nSkipping run goal.\n");
             return;
@@ -58,6 +61,15 @@ public class RunServerMojo extends PluginConfigSupport {
     }
 
     private void doRunServer() throws MojoExecutionException {
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
+        }
+
         String projectPackaging = project.getPackaging();
 
         // If there are downstream projects (e.g. other modules depend on this module in the Maven Reactor build order),

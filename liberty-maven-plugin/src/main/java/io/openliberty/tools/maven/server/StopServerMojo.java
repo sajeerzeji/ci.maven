@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.maven.server;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -39,6 +40,9 @@ public class StopServerMojo extends StartDebugMojoSupport {
     public void execute() throws MojoExecutionException {
         init();
 
+        // Get the toolchain if configured
+        initToolchain();
+
         if (skip) {
             getLog().info("\nSkipping stop goal.\n");
             return;
@@ -48,6 +52,15 @@ public class StopServerMojo extends StartDebugMojoSupport {
     }
 
     private void doStopServer() throws MojoExecutionException {
+        // Configure server to use toolchain JDK if available
+        if (toolchain != null) {
+            try {
+                configureServerForToolchain(toolchain);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error configuring server to use toolchain JDK", e);
+            }
+        }
+
         getLog().info(MessageFormat.format(messages.getString("info.server.stopping"), serverName));
         
         if (serverDirectory.exists()) {

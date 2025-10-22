@@ -45,7 +45,7 @@ public class ExecuteMojoUtil {
             "includes", "jdkToolchain", "maxmem", "meminitial", "multiReleaseOutput", "optimize",
             "outputFileName", "parameters", "proc", "release", "showDeprecation", "showWarnings",
             "skipMain", "skipMultiThreadWarning", "source", "staleMillis", "target",
-            "useIncrementalCompilation", "verbose"
+            "useIncrementalCompilation", "verbose", "jdkToolchain"
     ));
 
     // https://maven.apache.org/plugins/maven-compiler-plugin/testCompile-mojo.html
@@ -58,7 +58,7 @@ public class ExecuteMojoUtil {
             "proc", "release", "showDeprecation", "showWarnings", "skip", "skipMultiThreadWarning",
             "source", "staleMillis", "target", "testCompilerArgument", "testCompilerArguments",
             "testExcludes", "testIncludes", "testRelease", "testSource", "testTarget",
-            "useIncrementalCompilation", "verbose"
+            "useIncrementalCompilation", "verbose", "jdkToolchain"
     ));
 
     // https://maven.apache.org/plugins/maven-resources-plugin/resources-mojo.html
@@ -98,7 +98,7 @@ public class ExecuteMojoUtil {
             "testFailureIgnore", "testNGArtifactName", "threadCount", "threadCountClasses",
             "threadCountMethods", "threadCountSuites", "trimStackTrace", "useFile",
             "useManifestOnlyJar", "useModulePath", "useSystemClassLoader",
-            "useUnlimitedThreads", "workingDirectory"
+            "useUnlimitedThreads", "workingDirectory", "jdkToolchain"
     ));
 
     // https://maven.apache.org/surefire/maven-failsafe-plugin/integration-test-mojo.html
@@ -120,7 +120,7 @@ public class ExecuteMojoUtil {
             "systemPropertyVariables", "tempDir", "test", "testClassesDirectory",
             "testNGArtifactName", "threadCount", "threadCountClasses", "threadCountMethods",
             "threadCountSuites", "trimStackTrace", "useFile", "useManifestOnlyJar",
-            "useModulePath", "useSystemClassLoader", "useUnlimitedThreads", "workingDirectory"
+            "useModulePath", "useSystemClassLoader", "useUnlimitedThreads", "workingDirectory", "jdkToolchain"
     ));
 
     // https://maven.apache.org/surefire/maven-failsafe-plugin/verify-mojo.html
