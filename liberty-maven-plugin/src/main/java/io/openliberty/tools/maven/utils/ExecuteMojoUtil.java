@@ -127,7 +127,7 @@ public class ExecuteMojoUtil {
     private static final ArrayList<String> VERIFY_PARAMS = new ArrayList<>(Arrays.asList(
             "summaryFile", "basedir", "encoding", "failIfNoTests", "reportsDirectory",
             "skip", "skipExec", "skipITs", "skipTests", "summaryFiles", 
-            "testClassesDirectory", "testFailureIgnore"
+            "testClassesDirectory", "testFailureIgnore", "jdkToolchain"
     ));
 
     // https://maven.apache.org/surefire/maven-surefire-report-plugin/report-only-mojo.html
