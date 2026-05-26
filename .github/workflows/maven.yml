@@ -34,6 +34,13 @@ jobs:
             RUNTIME: ol
           - java: 21
             RUNTIME: ol
+        include:
+          - RUNTIME: ol
+            RUNTIME_VERSION: 25.0.0.12
+            java: 8
+          - RUNTIME: wlp
+            RUNTIME_VERSION: 25.0.0.12
+            java: 11
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
     steps:
       # Checkout repos
@@ -135,7 +142,7 @@ jobs:
         # test against latest update of each major Java version, as well as specific updates of LTS versions:
         RUNTIME: [ol, wlp]
         RUNTIME_VERSION: [26.0.0.5]
-        java: [ 25, 21, 17, 11, 8 ]
+        java: [25, 21, 17, 11, 8]
         exclude:
           - java: 8
             RUNTIME: wlp
@@ -145,6 +152,13 @@ jobs:
             RUNTIME: ol
           - java: 21
             RUNTIME: ol
+        include:
+          - RUNTIME: ol
+            RUNTIME_VERSION: 25.0.0.12
+            java: 8
+          - RUNTIME: wlp
+            RUNTIME_VERSION: 25.0.0.12
+            java: 11
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
     steps:
       # Checkout repos
