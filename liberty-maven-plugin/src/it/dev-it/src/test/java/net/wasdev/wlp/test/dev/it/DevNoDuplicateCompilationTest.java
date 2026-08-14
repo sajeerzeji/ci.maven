@@ -75,10 +75,10 @@ public class DevNoDuplicateCompilationTest extends BaseDevTest {
         assertTrue("Liberty hot reload message (CWWKZ0003I) not found",
             verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++initialHotReloadCount));
 
-        // Wait for generate-features to trigger its own hot reload (second CWWKZ0003I).
-        // Using event-driven wait instead of blind sleep to avoid flakiness.
-        assertTrue("Liberty hot reload after generate-features not found",
-            verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++initialHotReloadCount));
+        // Allow the generate-features cycle to complete if it fires a second hot reload.
+        // We cannot event-drive this wait because the reload only occurs when new features
+        // are actually detected; on subsequent runs no second CWWKZ0003I is produced.
+        Thread.sleep(5000);
 
         // Count final compilation messages
         int finalCompilationCount = countOccurrences(COMPILATION_SUCCESSFUL, logFile);
@@ -86,8 +86,9 @@ public class DevNoDuplicateCompilationTest extends BaseDevTest {
 
         assertEquals("Duplicate compilation detected - compilation happened more than once",
             initialCompilationCount, finalCompilationCount);
-        assertEquals("Multiple hot reloads detected - should only reload once per change",
-            initialHotReloadCount, finalHotReloadCount);
+        // Allow at most one extra hot reload from generate-features, but no more.
+        assertTrue("Unexpected extra hot reloads detected",
+            finalHotReloadCount <= initialHotReloadCount + 1);
     }
 
     @Test
@@ -128,10 +129,10 @@ public class DevNoDuplicateCompilationTest extends BaseDevTest {
             assertTrue("Liberty hot reload message (CWWKZ0003I) not found for change #" + i,
                 verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++hotReloadCountBefore));
 
-            // Wait for generate-features to trigger its own hot reload (second CWWKZ0003I).
-            // Using event-driven wait instead of blind sleep to avoid flakiness.
-            assertTrue("Liberty hot reload after generate-features not found for change #" + i,
-                verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++hotReloadCountBefore));
+            // Allow the generate-features cycle to complete if it fires a second hot reload.
+            // We cannot event-drive this wait because the reload only occurs when new features
+            // are actually detected; on subsequent runs no second CWWKZ0003I is produced.
+            Thread.sleep(5000);
 
             // Count compilation messages after change
             int compilationCountAfter = countOccurrences(COMPILATION_SUCCESSFUL, logFile);
@@ -139,8 +140,9 @@ public class DevNoDuplicateCompilationTest extends BaseDevTest {
 
             assertEquals("Duplicate compilation detected for change #" + i,
                 compilationCountBefore, compilationCountAfter);
-            assertEquals("Multiple hot reloads detected for change #" + i,
-                hotReloadCountBefore, hotReloadCountAfter);
+            // Allow at most one extra hot reload from generate-features, but no more.
+            assertTrue("Unexpected extra hot reloads detected for change #" + i,
+                hotReloadCountAfter <= hotReloadCountBefore + 1);
         }
     }
 }
