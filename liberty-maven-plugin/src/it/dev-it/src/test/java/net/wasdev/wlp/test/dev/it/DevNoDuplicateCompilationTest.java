@@ -75,10 +75,10 @@ public class DevNoDuplicateCompilationTest extends BaseDevTest {
         assertTrue("Liberty hot reload message (CWWKZ0003I) not found",
             verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++initialHotReloadCount));
 
-        Thread.sleep(3000);
-        // [INFO] Running liberty:generate-features ...
-        // [INFO] [AUDIT   ] CWWKZ0003I: The application dev-sample-proj-1.0-SNAPSHOT updated in 0.053 seconds.
-        ++initialHotReloadCount;
+        // Wait for generate-features to trigger its own hot reload (second CWWKZ0003I).
+        // Using event-driven wait instead of blind sleep to avoid flakiness.
+        assertTrue("Liberty hot reload after generate-features not found",
+            verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++initialHotReloadCount));
 
         // Count final compilation messages
         int finalCompilationCount = countOccurrences(COMPILATION_SUCCESSFUL, logFile);
@@ -128,7 +128,10 @@ public class DevNoDuplicateCompilationTest extends BaseDevTest {
             assertTrue("Liberty hot reload message (CWWKZ0003I) not found for change #" + i,
                 verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++hotReloadCountBefore));
 
-            Thread.sleep(3000);
+            // Wait for generate-features to trigger its own hot reload (second CWWKZ0003I).
+            // Using event-driven wait instead of blind sleep to avoid flakiness.
+            assertTrue("Liberty hot reload after generate-features not found for change #" + i,
+                verifyLogMessageExists(SERVER_CONFIG_SUCCESS, 10000, ++hotReloadCountBefore));
 
             // Count compilation messages after change
             int compilationCountAfter = countOccurrences(COMPILATION_SUCCESSFUL, logFile);
